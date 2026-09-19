@@ -37,9 +37,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://shadism.spark-js.it"
-Documentation = "https://shadism.spark-js.it"
-"Bale Channel" = "https://ble.ir/shadism_news"
+Homepage = "https://shadism.spark-js.ir"
+Documentation = "https://shadism.spark-js.ir"
+"Bale Channel" = "https://ble.ir/join/8jXbafMPwL"
 Repository = "https://github.com/AmirAli-khosravinejad/shadism"
 Issues = "https://github.com/AmirAli-khosravinejad/shadism/issues"
 

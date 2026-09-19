@@ -22,6 +22,8 @@ venv.bak/
 *.session
 test.py
 test_*.py
+duck.html
+*.html
 
 .pytest_cache/
 .ruff_cache/

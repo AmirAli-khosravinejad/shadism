@@ -3,8 +3,8 @@
 [![PyPI Version](https://img.shields.io/badge/pypi-v1.0.0-blue.svg)](https://pypi.org/project/shadism/)
 [![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-00d2ff.svg)](https://pypi.org/project/shadism/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-shadism.spark--js.it-00f0ff.svg)](https://shadism.spark-js.it)
-[![Bale Channel](https://img.shields.io/badge/Bale%20Channel-shadism__news-00a4d6.svg)](https://ble.ir/shadism_news)
+[![Documentation](https://img.shields.io/badge/docs-shadism.spark--js.ir-00f0ff.svg)](https://shadism.spark-js.ir)
+[![Bale Channel](https://img.shields.io/badge/Bale%20Channel-shadism-00a4d6.svg)](https://ble.ir/join/8jXbafMPwL)
 
 **shadism** is an ultra-high-performance, modern, and fully asynchronous Python SDK and UserBot framework for the **Shad** messenger protocol.
 
@@ -16,9 +16,9 @@ Designed from the ground up with native `asyncio`, client-side end-to-end encryp
 
 - **Author**: AmirAli khosravinejad
 - **Email**: [khosravinejad.amirali@gmail.com](mailto:khosravinejad.amirali@gmail.com)
-- **Official Documentation**: [https://shadism.spark-js.it](https://shadism.spark-js.it)
+- **Official Documentation**: [https://shadism.spark-js.ir](https://shadism.spark-js.ir)
 - **GitHub Repository**: [https://github.com/AmirAli-khosravinejad/shadism](https://github.com/AmirAli-khosravinejad/shadism)
-- **Official Announcement Channel (Bale)**: [https://ble.ir/shadism_news](https://ble.ir/shadism_news)
+- **Official Announcement Channel (Bale)**: [https://ble.ir/join/8jXbafMPwL](https://ble.ir/join/8jXbafMPwL)
 
 ---
 
