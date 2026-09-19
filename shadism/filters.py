@@ -227,6 +227,16 @@ class ChatFilter(Filter):
         return f"ChatFilter(guids={self.guids!r})"
 
 
+class MeFilter(Filter):
+    async def check(self, message: "Message") -> bool:
+        if message._client and message._client.session:
+            return message.author_guid == message._client.session.user_guid
+        return False
+
+    def __str__(self) -> str:
+        return "MeFilter()"
+
+
 class AllFilter(Filter):
     async def check(self, message: "Message") -> bool:
         return True
@@ -248,3 +258,4 @@ channel = ChannelFilter()
 reply = ReplyFilter()
 edited = EditedFilter()
 all = AllFilter()
+me = MeFilter()
