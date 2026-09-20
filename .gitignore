@@ -21,6 +21,8 @@ venv.bak/
 
 *.session
 test.py
+self.py
+config.json
 test_*.py
 duck.html
 *.html

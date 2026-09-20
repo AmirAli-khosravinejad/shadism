@@ -815,3 +815,63 @@ class Methods:
             "participant_object_guid": participant_object_guid or self._session.user_guid,
         }
         return await self._transport.send_authenticated(method, input_data)
+
+    async def check_user_username(self, username: str) -> Dict[str, Any]:
+        cleaned = username.lstrip("@").strip()
+        return await self._transport.send_authenticated("checkUserUsername", {"username": cleaned})
+
+    async def check_channel_username(self, username: str) -> Dict[str, Any]:
+        cleaned = username.lstrip("@").strip()
+        return await self._transport.send_authenticated("checkChannelUsername", {"username": cleaned})
+
+    async def set_block_user(self, user_guid: str, action: str = "Block") -> Dict[str, Any]:
+        if action not in ("Block", "Unblock"):
+            raise ValueError("action must be either 'Block' or 'Unblock'")
+        return await self._transport.send_authenticated(
+            "setBlockUser", {"user_guid": user_guid, "action": action}
+        )
+
+    async def get_avatars(self, object_guid: str) -> Dict[str, Any]:
+        return await self._transport.send_authenticated("getAvatars", {"object_guid": object_guid})
+
+    async def send_chat_activity(self, object_guid: str, activity: str = "Typing") -> Dict[str, Any]:
+        if activity not in ("Typing", "Uploading", "Recording"):
+            raise ValueError("activity must be one of 'Typing', 'Uploading', 'Recording'")
+        return await self._transport.send_authenticated(
+            "sendChatActivity", {"object_guid": object_guid, "activity": activity}
+        )
+
+    async def seen_chats(self, seen_list: Dict[str, str]) -> Dict[str, Any]:
+        return await self._transport.send_authenticated("seenChats", {"seen_list": seen_list})
+
+    async def delete_chat_history(
+        self, object_guid: str, last_message_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        input_data: Dict[str, Any] = {"object_guid": object_guid}
+        if last_message_id is not None:
+            input_data["last_message_id"] = last_message_id
+        return await self._transport.send_authenticated("deleteChatHistory", input_data)
+
+    async def get_group_link(self, group_guid: str) -> Dict[str, Any]:
+        return await self._transport.send_authenticated("getGroupLink", {"group_guid": group_guid})
+
+    async def get_channel_link(self, channel_guid: str) -> Dict[str, Any]:
+        return await self._transport.send_authenticated("getChannelLink", {"channel_guid": channel_guid})
+
+    async def join_channel_action(self, channel_guid: str, action: str = "Join") -> Dict[str, Any]:
+        if action not in ("Join", "Remove"):
+            raise ValueError("action must be either 'Join' or 'Remove'")
+        return await self._transport.send_authenticated(
+            "joinChannelAction", {"channel_guid": channel_guid, "action": action}
+        )
+
+    async def join_channel_by_link(self, join_hash: str) -> Dict[str, Any]:
+        token = join_hash.split("/")[-1].strip()
+        return await self._transport.send_authenticated("joinChannelByLink", {"hash": token})
+
+    async def join_group(self, join_hash: str) -> Dict[str, Any]:
+        token = join_hash.split("/")[-1].strip()
+        return await self._transport.send_authenticated("joinGroup", {"hash": token})
+
+    async def leave_group(self, group_guid: str) -> Dict[str, Any]:
+        return await self._transport.send_authenticated("leaveGroup", {"group_guid": group_guid})

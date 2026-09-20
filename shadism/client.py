@@ -320,6 +320,47 @@ class Client:
     ) -> Dict[str, Any]:
         return await self.methods.set_voice_chat_state(chat_guid, voice_chat_id, activity, participant_object_guid)
 
+    async def check_user_username(self, username: str) -> Dict[str, Any]:
+        return await self.methods.check_user_username(username)
+
+    async def check_channel_username(self, username: str) -> Dict[str, Any]:
+        return await self.methods.check_channel_username(username)
+
+    async def set_block_user(self, user_guid: str, action: str = "Block") -> Dict[str, Any]:
+        return await self.methods.set_block_user(user_guid, action)
+
+    async def get_avatars(self, object_guid: str) -> Dict[str, Any]:
+        return await self.methods.get_avatars(object_guid)
+
+    async def send_chat_activity(self, object_guid: str, activity: str = "Typing") -> Dict[str, Any]:
+        return await self.methods.send_chat_activity(object_guid, activity)
+
+    async def seen_chats(self, seen_list: Dict[str, str]) -> Dict[str, Any]:
+        return await self.methods.seen_chats(seen_list)
+
+    async def delete_chat_history(
+        self, object_guid: str, last_message_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        return await self.methods.delete_chat_history(object_guid, last_message_id)
+
+    async def get_group_link(self, group_guid: str) -> Dict[str, Any]:
+        return await self.methods.get_group_link(group_guid)
+
+    async def get_channel_link(self, channel_guid: str) -> Dict[str, Any]:
+        return await self.methods.get_channel_link(channel_guid)
+
+    async def join_channel_action(self, channel_guid: str, action: str = "Join") -> Dict[str, Any]:
+        return await self.methods.join_channel_action(channel_guid, action)
+
+    async def join_channel_by_link(self, join_hash: str) -> Dict[str, Any]:
+        return await self.methods.join_channel_by_link(join_hash)
+
+    async def join_group(self, join_hash: str) -> Dict[str, Any]:
+        return await self.methods.join_group(join_hash)
+
+    async def leave_group(self, group_guid: str) -> Dict[str, Any]:
+        return await self.methods.leave_group(group_guid)
+
     def set_messenger_host(self, host: str) -> None:
         self.session.messenger_host = host
         self._storage.save(self.session)

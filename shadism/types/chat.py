@@ -18,8 +18,16 @@ class Chat:
     description: Optional[str] = None
     members_count: int = 0
     voice_chat_id: Optional[str] = None
+    count_unseen: int = 0
+    last_message: Optional[Dict[str, Any]] = None
+    avatar_thumbnail: Optional[Dict[str, Any]] = None
+    is_deleted: bool = False
     raw: Dict[str, Any] = field(default_factory=dict, repr=False)
     _client: Optional[Client] = field(default=None, repr=False, compare=False)
+
+    @property
+    def chat_type(self) -> str:
+        return self.type
 
     def __getitem__(self, key: str) -> Any:
         return self.raw[key]
@@ -233,6 +241,20 @@ class Chat:
                 or chat_meta.get("channel_voice_chat_id")
             )
 
+        count_unseen = int(raw.get("count_unseen") or chat_meta.get("count_unseen") or 0)
+        last_message = raw.get("last_message") or chat_meta.get("last_message")
+        avatar_thumbnail = (
+            raw.get("avatar_thumbnail")
+            or chat_meta.get("avatar_thumbnail")
+            or (user.get("avatar_thumbnail") if isinstance(user, dict) else None)
+            or (group.get("avatar_thumbnail") if isinstance(group, dict) else None)
+            or (channel.get("avatar_thumbnail") if isinstance(channel, dict) else None)
+        )
+        is_deleted = bool(
+            raw.get("is_deleted")
+            or (user.get("is_deleted") if isinstance(user, dict) else False)
+        )
+
         return cls(
             guid=guid,
             title=title,
@@ -241,6 +263,10 @@ class Chat:
             description=description,
             members_count=members_count,
             voice_chat_id=voice_chat_id,
+            count_unseen=count_unseen,
+            last_message=last_message,
+            avatar_thumbnail=avatar_thumbnail,
+            is_deleted=is_deleted,
             raw=raw,
             _client=client,
         )
