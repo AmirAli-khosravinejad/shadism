@@ -875,3 +875,46 @@ class Methods:
 
     async def leave_group(self, group_guid: str) -> Dict[str, Any]:
         return await self._transport.send_authenticated("leaveGroup", {"group_guid": group_guid})
+
+    async def add_contact(
+        self, phone: str, first_name: str, last_name: str = ""
+    ) -> Dict[str, Any]:
+        cleaned = phone.strip().replace(" ", "").replace("-", "").lstrip("+")
+        if cleaned.startswith("98"):
+            cleaned = "0" + cleaned[2:]
+        elif not cleaned.startswith("0") and len(cleaned) == 10:
+            cleaned = "0" + cleaned
+        input_data = {
+            "phone": cleaned,
+            "first_name": str(first_name),
+            "last_name": str(last_name),
+        }
+        return await self._transport.send_authenticated("addAddressBook", input_data)
+
+    async def delete_contact(self, user_guid: str) -> Dict[str, Any]:
+        return await self._transport.send_authenticated("deleteContact", {"user_guid": user_guid})
+
+    async def get_contacts(self, start_id: Optional[str] = None) -> Dict[str, Any]:
+        input_data = {"start_id": str(start_id) if start_id else None}
+        return await self._transport.send_authenticated("getContacts", input_data)
+
+    async def get_user_by_phone(
+        self, phone: str, auto_delete: bool = True
+    ) -> Optional[User]:
+        res = await self.add_contact(phone=phone, first_name="ContactLookup", last_name="")
+        data = res.get("data") if isinstance(res.get("data"), dict) else res
+        user_dict = data.get("user")
+        if not user_dict and isinstance(data.get("contact"), dict):
+            user_dict = data["contact"].get("user")
+
+        if not user_dict or not isinstance(user_dict, dict):
+            return None
+
+        user_obj = User.from_dict(user_dict)
+        if auto_delete and user_obj.guid:
+            try:
+                await self.delete_contact(user_obj.guid)
+            except Exception:
+                pass
+
+        return user_obj

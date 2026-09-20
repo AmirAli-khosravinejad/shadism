@@ -361,6 +361,22 @@ class Client:
     async def leave_group(self, group_guid: str) -> Dict[str, Any]:
         return await self.methods.leave_group(group_guid)
 
+    async def add_contact(
+        self, phone: str, first_name: str, last_name: str = ""
+    ) -> Dict[str, Any]:
+        return await self.methods.add_contact(phone, first_name, last_name)
+
+    async def delete_contact(self, user_guid: str) -> Dict[str, Any]:
+        return await self.methods.delete_contact(user_guid)
+
+    async def get_contacts(self, start_id: Optional[str] = None) -> Dict[str, Any]:
+        return await self.methods.get_contacts(start_id)
+
+    async def get_user_by_phone(
+        self, phone: str, auto_delete: bool = True
+    ) -> Optional[User]:
+        return await self.methods.get_user_by_phone(phone, auto_delete)
+
     def set_messenger_host(self, host: str) -> None:
         self.session.messenger_host = host
         self._storage.save(self.session)
