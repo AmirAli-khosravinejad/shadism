@@ -682,19 +682,72 @@ class Methods:
 
         return collected_messages[:target_limit]
 
-    async def get_chat_info(self, object_guid: str) -> Chat:
-        if object_guid.startswith("g0"):
-            method = "getGroupInfo"
-            input_data = {"group_guid": object_guid}
-        elif object_guid.startswith("c0"):
-            method = "getChannelInfo"
-            input_data = {"channel_guid": object_guid}
-        else:
-            method = "getUserInfo"
-            input_data = {"user_guid": object_guid}
-        response = await self._transport.send_authenticated(method, input_data)
-        data_dict = response.get("data") if isinstance(response.get("data"), dict) else response
-        return Chat.from_dict(data_dict, client=self._client)
+    async def get_chat_info(self, object_guid: Optional[str] = None) -> Chat:
+        target = (object_guid or "").strip()
+        if not target:
+            res = await self._transport.send_authenticated("getUserInfo", {})
+            return Chat.from_dict(res, client=self._client)
+
+        if target.startswith("@"):
+            return await self.get_chat_info_by_username(target)
+
+        if "/" in target or "shad.ir" in target or "rubika.ir" in target:
+            clean_part = target.split("/")[-1].strip()
+            if "joing" in target.lower():
+                try:
+                    res = await self.group_preview_by_join_link(clean_part)
+                    return Chat.from_dict(res, client=self._client)
+                except Exception:
+                    pass
+            elif "joinc" in target.lower():
+                try:
+                    res = await self.channel_preview_by_join_link(clean_part)
+                    return Chat.from_dict(res, client=self._client)
+                except Exception:
+                    pass
+            return await self.get_chat_info_by_username(clean_part)
+
+        if target.startswith("g0"):
+            response = await self._transport.send_authenticated(
+                "getGroupInfo", {"group_guid": target}
+            )
+            return Chat.from_dict(response, client=self._client)
+
+        if target.startswith("c0"):
+            response = await self._transport.send_authenticated(
+                "getChannelInfo", {"channel_guid": target}
+            )
+            return Chat.from_dict(response, client=self._client)
+
+        if target.startswith("b0"):
+            try:
+                response = await self._transport.send_authenticated(
+                    "getBotInfo", {"bot_guid": target}
+                )
+                return Chat.from_dict(response, client=self._client)
+            except Exception:
+                pass
+
+        if target.startswith("u0"):
+            try:
+                response = await self._transport.send_authenticated(
+                    "getUserInfo", {"user_guid": target}
+                )
+                return Chat.from_dict(response, client=self._client)
+            except Exception:
+                try:
+                    response = await self._transport.send_authenticated("getUserInfo", {})
+                    return Chat.from_dict(response, client=self._client)
+                except Exception:
+                    pass
+
+        try:
+            return await self.get_chat_info_by_username(target)
+        except Exception:
+            response = await self._transport.send_authenticated(
+                "getUserInfo", {"user_guid": target}
+            )
+            return Chat.from_dict(response, client=self._client)
 
     async def get_chat_info_by_username(self, username: str) -> Chat:
         clean_username = username.lstrip("@").strip()
@@ -708,8 +761,7 @@ class Methods:
                 "getObjectInfoByUsername",
                 {"username": clean_username},
             )
-        data_dict = response.get("data") if isinstance(response.get("data"), dict) else response
-        return Chat.from_dict(data_dict, client=self._client)
+        return Chat.from_dict(response, client=self._client)
 
     async def join_voice_chat(
         self,
@@ -867,11 +919,43 @@ class Methods:
 
     async def join_channel_by_link(self, join_hash: str) -> Dict[str, Any]:
         token = join_hash.split("/")[-1].strip()
-        return await self._transport.send_authenticated("joinChannelByLink", {"hash": token})
+        return await self._transport.send_authenticated(
+            "joinChannelByLink", {"hash_link": token}
+        )
 
     async def join_group(self, join_hash: str) -> Dict[str, Any]:
         token = join_hash.split("/")[-1].strip()
-        return await self._transport.send_authenticated("joinGroup", {"hash": token})
+        return await self._transport.send_authenticated(
+            "joinGroup", {"hash_link": token}
+        )
+
+    async def group_preview_by_join_link(self, join_hash: str) -> Dict[str, Any]:
+        token = join_hash.split("/")[-1].strip()
+        return await self._transport.send_authenticated(
+            "groupPreviewByJoinLink", {"hash_link": token}
+        )
+
+    async def channel_preview_by_join_link(self, join_hash: str) -> Dict[str, Any]:
+        token = join_hash.split("/")[-1].strip()
+        return await self._transport.send_authenticated(
+            "channelPreviewByJoinLink", {"hash_link": token}
+        )
+
+    async def join_chat(self, guid_or_link: str) -> Dict[str, Any]:
+        target = guid_or_link.strip()
+        token = target.split("/")[-1].strip()
+        if "joing" in target.lower():
+            return await self.join_group(token)
+        if "joinc" in target.lower():
+            return await self.join_channel_by_link(token)
+        if target.startswith("c0"):
+            return await self.join_channel_action(target, action="Join")
+        if target.startswith("g0"):
+            return await self.join_group(token)
+        try:
+            return await self.join_channel_by_link(token)
+        except Exception:
+            return await self.join_group(token)
 
     async def leave_group(self, group_guid: str) -> Dict[str, Any]:
         return await self._transport.send_authenticated("leaveGroup", {"group_guid": group_guid})
@@ -910,14 +994,26 @@ class Methods:
         if not user_dict or not isinstance(user_dict, dict):
             return None
 
-        user_obj = User.from_dict(user_dict)
-        if auto_delete and user_obj.guid:
+        target_guid = user_dict.get("user_guid")
+        real_user = None
+
+        if auto_delete and target_guid:
             try:
-                await self.delete_contact(user_obj.guid)
+                await self.delete_contact(target_guid)
             except Exception:
                 pass
 
-        return user_obj
+        if target_guid:
+            try:
+                real_user = await self.get_user_info(target_guid)
+            except Exception:
+                real_user = None
+
+        if real_user and real_user.guid:
+            if not real_user.phone:
+                real_user.phone = user_dict.get("phone") or phone
+            return real_user
+        return User.from_dict(user_dict)
 
     async def create_group(
         self,
@@ -932,11 +1028,30 @@ class Methods:
             else:
                 guids = [str(g).strip() for g in member_guids if str(g).strip()]
 
+        if not guids:
+            try:
+                contacts_res = await self.get_contacts()
+                c_data = contacts_res.get("data") if isinstance(contacts_res.get("data"), dict) else contacts_res
+                users = c_data.get("users", []) or c_data.get("contacts", [])
+                if users and isinstance(users, list):
+                    for u in users:
+                        cand = u.get("user_guid") or (u.get("user", {}).get("user_guid") if isinstance(u.get("user"), dict) else None)
+                        if cand and str(cand).startswith("u0"):
+                            guids = [str(cand)]
+                            break
+            except Exception:
+                pass
+
+        if not guids:
+            raise ValueError(
+                "برای ساخت گروه در شاد، مشخص کردن حداقل یک عضو (member_guids) الزامی است."
+            )
+
         input_data: Dict[str, Any] = {
             "title": title.strip(),
             "member_guids": guids,
         }
-        if description:
+        if description and description.strip():
             input_data["description"] = description.strip()
 
         response = await self._transport.send_authenticated("addGroup", input_data)

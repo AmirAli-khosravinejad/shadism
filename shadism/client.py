@@ -273,7 +273,7 @@ class Client:
     async def register_device(self) -> Dict[str, Any]:
         return await self.methods.register_device()
 
-    async def get_chat_info(self, object_guid: str) -> Chat:
+    async def get_chat_info(self, object_guid: Optional[str] = None) -> Chat:
         return await self.methods.get_chat_info(object_guid)
 
     async def get_chat_info_by_username(self, username: str) -> Chat:
@@ -357,6 +357,15 @@ class Client:
 
     async def join_group(self, join_hash: str) -> Dict[str, Any]:
         return await self.methods.join_group(join_hash)
+
+    async def group_preview_by_join_link(self, join_hash: str) -> Dict[str, Any]:
+        return await self.methods.group_preview_by_join_link(join_hash)
+
+    async def channel_preview_by_join_link(self, join_hash: str) -> Dict[str, Any]:
+        return await self.methods.channel_preview_by_join_link(join_hash)
+
+    async def join_chat(self, guid_or_link: str) -> Dict[str, Any]:
+        return await self.methods.join_chat(guid_or_link)
 
     async def leave_group(self, group_guid: str) -> Dict[str, Any]:
         return await self.methods.leave_group(group_guid)

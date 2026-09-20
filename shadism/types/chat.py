@@ -171,10 +171,17 @@ class Chat:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any], client: Optional["Client"] = None) -> "Chat":
-        raw = data if isinstance(data, dict) else {}
+        if not isinstance(data, dict):
+            return cls(guid="")
+        raw = data.copy()
+        if "data" in raw and isinstance(raw["data"], dict):
+            inner_data = raw["data"]
+            for k, v in inner_data.items():
+                raw.setdefault(k, v)
         group = raw.get("group") if isinstance(raw.get("group"), dict) else None
         channel = raw.get("channel") if isinstance(raw.get("channel"), dict) else None
         user = raw.get("user") if isinstance(raw.get("user"), dict) else None
+        bot_meta = raw.get("bot") if isinstance(raw.get("bot"), dict) else None
         chat_meta = raw.get("chat") if isinstance(raw.get("chat"), dict) else {}
 
         guid = ""
@@ -207,6 +214,14 @@ class Chat:
                 chat_meta.get("channel_voice_chat_id")
                 or channel.get("voice_chat_id")
             )
+        elif bot_meta is not None:
+            guid = bot_meta.get("bot_guid") or raw.get("object_guid") or ""
+            title = bot_meta.get("bot_title") or bot_meta.get("title") or ""
+            chat_type = "Bot"
+            username = bot_meta.get("username")
+            description = bot_meta.get("description")
+            members_count = 0
+            voice_chat_id = None
         elif user is not None:
             guid = user.get("user_guid") or raw.get("object_guid") or ""
             first = user.get("first_name") or ""

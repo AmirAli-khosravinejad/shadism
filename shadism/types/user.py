@@ -33,14 +33,24 @@ class User:
 
     @classmethod
     def from_dict(cls, data: dict) -> "User":
-        profile = data.get("user", data) if isinstance(data, dict) else {}
-        if not isinstance(profile, dict):
-            profile = {}
+        if not isinstance(data, dict):
+            return cls(guid="")
+        profile = data
+        if "data" in profile and isinstance(profile["data"], dict):
+            profile = profile["data"]
+        if "user" in profile and isinstance(profile["user"], dict):
+            profile = profile["user"]
+        elif "contact" in profile and isinstance(profile["contact"], dict):
+            c = profile["contact"]
+            if "user" in c and isinstance(c["user"], dict):
+                profile = c["user"]
+            else:
+                profile = c
         first = profile.get("first_name") or ""
         last = profile.get("last_name") or ""
-        full_name = f"{first} {last}".strip()
+        full_name = f"{first} {last}".strip() or first or last or profile.get("name") or ""
         return cls(
-            guid=profile.get("user_guid") or "",
+            guid=profile.get("user_guid") or profile.get("guid") or "",
             name=full_name,
             first_name=first,
             last_name=last,
