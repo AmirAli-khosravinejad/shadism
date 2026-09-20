@@ -377,6 +377,22 @@ class Client:
     ) -> Optional[User]:
         return await self.methods.get_user_by_phone(phone, auto_delete)
 
+    async def create_group(
+        self,
+        title: str,
+        member_guids: Optional[Union[str, List[str]]] = None,
+        description: Optional[str] = None,
+    ) -> Chat:
+        return await self.methods.create_group(title, member_guids, description)
+
+    async def add_group(
+        self,
+        title: str,
+        member_guids: Optional[Union[str, List[str]]] = None,
+        description: Optional[str] = None,
+    ) -> Chat:
+        return await self.methods.add_group(title, member_guids, description)
+
     def set_messenger_host(self, host: str) -> None:
         self.session.messenger_host = host
         self._storage.save(self.session)

@@ -918,3 +918,35 @@ class Methods:
                 pass
 
         return user_obj
+
+    async def create_group(
+        self,
+        title: str,
+        member_guids: Optional[Union[str, List[str]]] = None,
+        description: Optional[str] = None,
+    ) -> Chat:
+        guids: List[str] = []
+        if member_guids:
+            if isinstance(member_guids, str):
+                guids = [member_guids.strip()]
+            else:
+                guids = [str(g).strip() for g in member_guids if str(g).strip()]
+
+        input_data: Dict[str, Any] = {
+            "title": title.strip(),
+            "member_guids": guids,
+        }
+        if description:
+            input_data["description"] = description.strip()
+
+        response = await self._transport.send_authenticated("addGroup", input_data)
+        data_dict = response.get("data") if isinstance(response.get("data"), dict) else response
+        return Chat.from_dict(data_dict, client=self._client)
+
+    async def add_group(
+        self,
+        title: str,
+        member_guids: Optional[Union[str, List[str]]] = None,
+        description: Optional[str] = None,
+    ) -> Chat:
+        return await self.create_group(title, member_guids, description)
