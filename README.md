@@ -52,7 +52,7 @@ pip install shadism
 import asyncio
 from shadism import Client, filters
 
-bot = Client("0937xxxxxxx")
+bot = Client("09000000000")
 
 @bot.on_message(filters.command("ping"))
 async def ping_handler(message):
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 ```python
 from shadism import Client
 
-bot = Client("0937xxxxxxx")
+bot = Client("09000000000")
 
 @bot.on_message
 async def history_example(message):
