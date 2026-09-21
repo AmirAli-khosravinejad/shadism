@@ -1611,7 +1611,7 @@ asyncio.run(main())</code></pre>
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              <strong style="color: var(--neon-cyan);">متد اختصاصی و هوشمند تاریخچه پیام‌ها:</strong> این متد با ترکیب اندپوینت‌های پیام و آپدیت و با بهره‌گیری از صفحه‌بندی خودکار (Automatic Pagination)، تاریخچه یک گفتگو (کاربر، گروه یا کانال) را تا سقف مقدار درخواستی دریافت کرده و به‌صورت لیستی از اشیای کامل <code>Message</code> برمی‌گرداند.
+              <strong style="color: var(--neon-cyan);">متد اختصاصی و هوشمند تاریخچه پیام‌ها:</strong> این متد پیشرفته با بهره‌گیری از صفحه‌بندی خودکار (Automatic Pagination)، تاریخچه یک گفتگو (کاربر، گروه یا کانال) را تا سقف مقدار درخواستی دریافت کرده و به‌صورت لیستی از اشیای کامل <code>Message</code> برمی‌گرداند.
             </p>
 
             <div class="params-table-wrapper">
@@ -1769,7 +1769,7 @@ reply_msg = <span class="kw">await</span> bot.send_message(
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              حذف پیام به صورت دوطرفه (<code>Global</code>) یا یکطرفه (<code>Local</code>). پروتکل شاد با ارسال نوع Global پیام را از دو طرف پاکسازی می‌کند.
+              حذف پیام به صورت دوطرفه (<code>Global</code>) یا یکطرفه (<code>Local</code>). با انتخاب حالت Global، پیام به صورت کامل برای هر دو طرف گفتگو پاکسازی می‌شود.
             </p>
             <div class="code-container">
               <div class="code-header">
@@ -1807,7 +1807,7 @@ reply_msg = <span class="kw">await</span> bot.send_message(
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              دریافت مستقیم بسته پیام‌های خام از سرور بر اساس بازه زمانی، آخرین شناسه (min_id/max_id) یا شناسه میانی با متد <code>get_messages_interval</code> و همچنین حذف کامل تاریخچه چت با <code>delete_chat_history</code>.
+              دریافت مستقیم بسته پیام‌ها بر اساس بازه زمانی، آخرین شناسه (min_id/max_id) یا شناسه میانی با متد <code>get_messages_interval</code> و همچنین حذف کامل تاریخچه گفتگو با <code>delete_chat_history</code>.
             </p>
 
             <div class="params-table-wrapper">
@@ -1831,7 +1831,7 @@ reply_msg = <span class="kw">await</span> bot.send_message(
                     <td><span class="param-name">limit</span></td>
                     <td><span class="param-type">int</span></td>
                     <td><span class="param-default">50</span></td>
-                    <td>تعداد پیام‌های دریافتی از سرور</td>
+                    <td>تعداد پیام‌های دریافتی</td>
                   </tr>
                   <tr>
                     <td><span class="param-name">sort</span></td>
@@ -1887,7 +1887,7 @@ interval = <span class="kw">await</span> bot.methods.get_messages_interval(
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              ارسال تصویر با فشرده‌سازی هوشمند بندانگشتی (Thumbnail)، محاسبه خودکار ابعاد طول و عرض و ارسال مستقیم به سرورهای آپلود شاد (<code>UploadFile.ashx</code>). ورودی تصویر می‌تواند آدرس فایل، شیء Path یا بایت‌های خام باشد.
+              ارسال تصویر با فشرده‌سازی خودکار پیش‌نمایش (Thumbnail)، محاسبه خودکار ابعاد طول و عرض و ارسال مستقیم و بهینه‌شده. ورودی تصویر می‌تواند مسیر فایل روی دیسک، شیء Path یا بایت‌های خام تصویر باشد.
             </p>
             <div class="code-container">
               <div class="code-header">
@@ -1963,7 +1963,7 @@ interval = <span class="kw">await</span> bot.methods.get_messages_interval(
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              آپلود باینری مستقیم به سرورهای استریم اختصاصی شاد با استفاده از تکه‌های باینری (Chunked Upload). خروجی شامل شناسه دسترسی <code>file_id</code> و کلید امنیتی <code>access_hash_send</code> جهت ضمیمه کردن در پیام‌ها است.
+              آپلود مستقیم فایل‌ها با استفاده از استریم تکه‌ای (Chunked Upload) و تحمل خطای بالا در برابر قطعی‌های شبکه. خروجی شامل شناسه فایل و مشخصات لازم جهت ضمیمه در پیام‌ها است.
             </p>
 
             <div class="code-container">
@@ -2012,7 +2012,7 @@ access_hash = upload_res[<span class="str">"access_hash_send"</span>]
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              دریافت اطلاعات جامع چت (پی‌وی، گروه یا کانال). این متد به‌طور خودکار نوع چت را بر اساس پیشوند شناسه (u0/g0/c0) تشخیص داده و متد مرتبط شاد (getUserInfo, getGroupInfo, getChannelInfo) را فراخوانی می‌کند.
+              دریافت اطلاعات جامع چت (پی‌وی، گروه یا کانال). این متد به‌طور خودکار نوع گفتگو را بر اساس شناسه هدف تشخیص داده و مدل یکپارچه <code>Chat</code> را به همراه عنوان، نوع چت و تعداد اعضا برمی‌گرداند.
             </p>
             <div class="code-container">
               <div class="code-header">
@@ -2139,7 +2139,7 @@ check_res = <span class="kw">await</span> bot.check_user_username(<span class="s
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              <strong style="color: var(--neon-cyan);">استعلام هوشمند اطلاعات کامل با شماره موبایل:</strong> این متد بدون نیاز به مداخله دستی، شماره تلفن را در دفترچه تلفن موقت ثبت نموده، پروفایل کامل هدف (شامل GUID یکتا، نام، یوزرنیم و بیو) را استخراج کرده و سپس با فلگ <code>auto_delete=True</code> به‌طور خودکار مخاطب تستی را از اکانت پاکسازی می‌کند.
+              <strong style="color: var(--neon-cyan);">استعلام هوشمند اطلاعات کامل با شماره موبایل:</strong> این متد اطلاعات کامل کاربر (شامل GUID یکتا، نام، نام خانوادگی، یوزرنیم، نشان رسمی و وضعیت آنلاین) را مستقیماً از روی شماره همراه استعلام کرده و به صورت شیء یکپارچه <code>User</code> بازمی‌گرداند.
             </p>
 
             <div class="params-table-wrapper">
@@ -2314,7 +2314,7 @@ vc_info = <span class="kw">await</span> bot.create_voice_chat(group_guid)
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              موتور پولینگ ناهمگام شادیسم به‌صورت خودکار تغییرات چت‌ها و پیام‌ها را واکشی می‌کند. همچنین می‌توانید مستقیماً آخرین وضعیت و رویدادهای سرور را با متدهای اختصاصی استعلام نمایید یا با دکوراتور <code>@bot.on_chat_updates</code> تغییرات گفتگوها را شنود کنید.
+              موتور پولینگ ناهمگام شادیسم به‌صورت خودکار تغییرات چت‌ها و پیام‌ها را دریافت و مدیریت می‌کند. همچنین می‌توانید مستقیماً آخرین وضعیت و رویدادها را با متدهای اختصاصی استعلام نمایید یا با دکوراتور <code>@bot.on_chat_updates</code> تغییرات گفتگوها را شنود کنید.
             </p>
 
             <div class="code-container">
@@ -2453,7 +2453,7 @@ bot = Client(<span class="str">"0937xxxxxxx"</span>)
           </div>
           <div class="mac-body">
             <p class="method-desc">
-              نمایش شیء‌گرای پیام‌های شاد با اتصالات خودکار به کلاینت. علاوه بر خصوصیات معمولی، امکان دسترسی شبه‌دیکشنری نظیر <code>msg["message_id"]</code> و دسترسی به بایت‌های خام سرور <code>msg.raw</code> فراهم است.
+              نمایش شیء‌گرای پیام‌های شاد با اتصالات خودکار به کلاینت. علاوه بر خصوصیات معمولی، امکان دسترسی شبه‌دیکشنری نظیر <code>msg["message_id"]</code> و دسترسی به ساختار داده کامل پیام از طریق <code>msg.raw</code> فراهم است.
             </p>
             <div class="code-container">
               <div class="code-header">

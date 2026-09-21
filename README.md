@@ -28,7 +28,7 @@ Designed from the ground up with native `asyncio`, client-side end-to-end encryp
 - **🔐 End-to-End Encryption**: Automated key generation, passphrases, AES-CBC payload encryption, and RSA authentication.
 - **🎯 Declarative Filters**: Chainable event filters (`filters.command`, `filters.regex`, `filters.group`, `filters.private`, `&`, `|`, `~`).
 - **📜 Smart Chat History**: `get_chat_history()` with automatic batch pagination, deduplication, and update fallback.
-- **📁 Automated Media Streaming**: Chunked file upload (`UploadFile.ashx`) and automatic photo thumbnail generation.
+- **📁 Automated Media Streaming**: Chunked file upload and automatic photo thumbnail generation.
 - **🎙️ Voice Chat (WebRTC)**: Group and channel voice chat creation, joining, speaking activity control, and participants management.
 - **🧩 Rich OOP Models**: Direct interaction with `Message`, `Chat`, and `User` objects (`await msg.reply()`, `await msg.delete()`, `await chat.send_message()`).
 
