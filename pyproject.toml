@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "shadism"
-version = "1.0.0"
+version = "2.0.0"
 description = "Ultra-high-performance async UserBot library for the Shad messenger web protocol"
 readme = "README.md"
 authors = [
@@ -37,8 +37,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://shadism.spark-js.ir"
-Documentation = "https://shadism.spark-js.ir"
+Homepage = "https://amirali-khosravinejad.github.io/shadism/"
+Documentation = "https://amirali-khosravinejad.github.io/shadism/"
 "Bale Channel" = "https://ble.ir/join/8jXbafMPwL"
 Repository = "https://github.com/AmirAli-khosravinejad/shadism"
 Issues = "https://github.com/AmirAli-khosravinejad/shadism/issues"

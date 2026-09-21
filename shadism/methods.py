@@ -904,12 +904,6 @@ class Methods:
             input_data["last_message_id"] = last_message_id
         return await self._transport.send_authenticated("deleteChatHistory", input_data)
 
-    async def get_group_link(self, group_guid: str) -> Dict[str, Any]:
-        return await self._transport.send_authenticated("getGroupLink", {"group_guid": group_guid})
-
-    async def get_channel_link(self, channel_guid: str) -> Dict[str, Any]:
-        return await self._transport.send_authenticated("getChannelLink", {"channel_guid": channel_guid})
-
     async def join_channel_action(self, channel_guid: str, action: str = "Join") -> Dict[str, Any]:
         if action not in ("Join", "Remove"):
             raise ValueError("action must be either 'Join' or 'Remove'")

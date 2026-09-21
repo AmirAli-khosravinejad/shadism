@@ -26,6 +26,7 @@ config.json
 test_*.py
 duck.html
 *.html
+!index.html
 
 .pytest_cache/
 .ruff_cache/

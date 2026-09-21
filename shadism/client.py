@@ -343,12 +343,6 @@ class Client:
     ) -> Dict[str, Any]:
         return await self.methods.delete_chat_history(object_guid, last_message_id)
 
-    async def get_group_link(self, group_guid: str) -> Dict[str, Any]:
-        return await self.methods.get_group_link(group_guid)
-
-    async def get_channel_link(self, channel_guid: str) -> Dict[str, Any]:
-        return await self.methods.get_channel_link(channel_guid)
-
     async def join_channel_action(self, channel_guid: str, action: str = "Join") -> Dict[str, Any]:
         return await self.methods.join_channel_action(channel_guid, action)
 
