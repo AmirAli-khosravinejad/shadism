@@ -17,10 +17,23 @@ from shadism.types.user import User
 from shadism.types.chat import Chat
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
+
+for noisy in (
+    "httpx",
+    "httpcore",
+    "hpack",
+    "shadism",
+    "shadism.network",
+    "shadism.crypto",
+    "shadism.methods",
+    "shadism.dispatcher",
+    "shadism.client",
+):
+    logging.getLogger(noisy).setLevel(logging.WARNING)
 
 logger = logging.getLogger("shadism.client")
 
@@ -35,7 +48,10 @@ class Client:
         self._phone_number = phone_number
         self._storage = SessionStorage(phone_number, directory=session_directory)
         self.session: Session = self._storage.load(phone_number)
-        self._pending_handlers: List[Tuple[MessageHandler, Optional[Filter]]] = []
+        self._pending_message_handlers: List[Tuple[MessageHandler, Optional[Filter]]] = []
+        self._pending_edited_handlers: List[Tuple[MessageHandler, Optional[Filter]]] = []
+        self._pending_chat_handlers: List[Callable[[Dict[str, Any]], Coroutine[Any, Any, None]]] = []
+        self._pending_seen_handlers: List[Callable[[Dict[str, Any]], Coroutine[Any, Any, None]]] = []
 
         if messenger_host:
             self.session.messenger_host = messenger_host
@@ -43,6 +59,10 @@ class Client:
         self._transport: Optional[Transport] = None
         self._methods: Optional[Methods] = None
         self._dispatcher: Optional[Dispatcher] = None
+
+    @property
+    def _pending_handlers(self) -> List[Tuple[MessageHandler, Optional[Filter]]]:
+        return self._pending_message_handlers
 
     @property
     def transport(self) -> Transport:
@@ -60,25 +80,29 @@ class Client:
         self._transport = Transport(self.session)
         self._methods = Methods(self.session, self._transport, self._storage, client=self)
         self._dispatcher = Dispatcher(self)
-        for handler, filter_obj in self._pending_handlers:
-            self._dispatcher.register_handler(handler, filter_obj=filter_obj)
-        self._pending_handlers.clear()
+        for handler, filter_obj in self._pending_message_handlers:
+            self._dispatcher.register_message_handler(handler, filter_obj=filter_obj)
+        self._pending_message_handlers.clear()
+        for handler, filter_obj in self._pending_edited_handlers:
+            self._dispatcher.register_edited_handler(handler, filter_obj=filter_obj)
+        self._pending_edited_handlers.clear()
+        for handler in self._pending_chat_handlers:
+            self._dispatcher.register_chat_handler(handler)
+        self._pending_chat_handlers.clear()
+        for handler in self._pending_seen_handlers:
+            self._dispatcher.register_seen_handler(handler)
+        self._pending_seen_handlers.clear()
 
     async def connect(self) -> None:
         self._bootstrap()
         methods = self.methods
         if not self.session.has_auth():
-            logger.info(
-                "No active session found for %s. Starting login flow...",
-                self._phone_number,
-            )
             await methods.login_flow(self._phone_number)
         else:
             try:
                 await methods.register_device()
             except Exception as exc:
                 if "INVALID_AUTH" in str(exc):
-                    logger.warning("Session auth expired or invalidated. Starting login flow...")
                     self.session.auth = ""
                     self.session.decode_auth = ""
                     self.session.key_hex = ""
@@ -91,14 +115,29 @@ class Client:
         if self._transport is None:
             await self.connect()
 
-        logger.info("Client authenticated. Starting dispatcher...")
+        username = ""
+        try:
+            user_info = await self.get_user_info()
+            username = (
+                user_info.username
+                or user_info.name
+                or user_info.guid
+                or self._phone_number
+            )
+        except Exception:
+            username = self.session.user_guid or self._phone_number
+
+        if username.startswith("@"):
+            username = username[1:]
+
+        print(f'self-bot start on "{username}"')
+
         if self._dispatcher is not None:
             self._dispatcher.start()
 
         loop = asyncio.get_running_loop()
 
         def _request_shutdown() -> None:
-            logger.info("Shutdown signal received.")
             asyncio.create_task(self.stop())
 
         for sig in (signal.SIGINT, signal.SIGTERM):
@@ -107,8 +146,13 @@ class Client:
             except (NotImplementedError, ValueError):
                 pass
 
-        logger.info("shadism client is running. Press Ctrl+C to stop.")
         await self._idle()
+
+    def run(self) -> None:
+        try:
+            asyncio.run(self.start())
+        except (KeyboardInterrupt, SystemExit):
+            pass
 
     async def _idle(self) -> None:
         while self._dispatcher is not None and self._dispatcher._running:
@@ -120,7 +164,6 @@ class Client:
         if self._transport:
             await self._transport.close()
         self._storage.save(self.session)
-        logger.info("Client stopped and session saved.")
 
     def on_message(
         self,
@@ -149,9 +192,54 @@ class Client:
         filter_obj: Optional[Filter] = None,
     ) -> None:
         if self._dispatcher is not None:
-            self._dispatcher.register_handler(func, filter_obj=filter_obj)
+            self._dispatcher.register_message_handler(func, filter_obj=filter_obj)
         else:
-            self._pending_handlers.append((func, filter_obj))
+            self._pending_message_handlers.append((func, filter_obj))
+
+    def on_edited_message(
+        self,
+        filters_or_func: Optional[Union[Filter, Callable[..., Any], MessageHandler]] = None,
+    ) -> Any:
+        import inspect
+
+        if inspect.iscoroutinefunction(filters_or_func):
+            func = filters_or_func
+            self._register_edited_handler(func, filter_obj=None)
+            return func
+
+        filter_obj: Optional[Filter] = None
+        if filters_or_func is not None:
+            filter_obj = ensure_filter(filters_or_func)
+
+        def decorator(func: MessageHandler) -> MessageHandler:
+            self._register_edited_handler(func, filter_obj=filter_obj)
+            return func
+
+        return decorator
+
+    def _register_edited_handler(
+        self,
+        func: MessageHandler,
+        filter_obj: Optional[Filter] = None,
+    ) -> None:
+        if self._dispatcher is not None:
+            self._dispatcher.register_edited_handler(func, filter_obj=filter_obj)
+        else:
+            self._pending_edited_handlers.append((func, filter_obj))
+
+    def on_chat_updates(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        if self._dispatcher is not None:
+            self._dispatcher.register_chat_handler(func)
+        else:
+            self._pending_chat_handlers.append(func)
+        return func
+
+    def on_seen(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        if self._dispatcher is not None:
+            self._dispatcher.register_seen_handler(func)
+        else:
+            self._pending_seen_handlers.append(func)
+        return func
 
     async def send_message(
         self,

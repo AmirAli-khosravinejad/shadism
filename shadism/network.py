@@ -225,7 +225,7 @@ class Transport:
                 )
                 if response.status_code == 200:
                     if host != self._session.messenger_host:
-                        logger.info("Messenger host rotated from %s to healthy host: %s", self._session.messenger_host, host)
+                        logger.debug("Messenger host rotated from %s to healthy host: %s", self._session.messenger_host, host)
                         self._session.messenger_host = host
                     return response.json()
                 elif response.status_code in (500, 502, 503, 504, 408, 429):
@@ -262,7 +262,7 @@ class Transport:
             plaintext, working_key, working_iv = decrypt_payload_probe(tmp_session, data_enc)
             self._session.set_key(working_key)
             self._session.set_iv(working_iv)
-            logger.info(
+            logger.debug(
                 "Session key/IV updated via probe.  key_prefix=%s  iv_prefix=%s",
                 working_key.hex()[:8],
                 working_iv.hex()[:8],

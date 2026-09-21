@@ -383,7 +383,7 @@ class Methods:
                 )
             except Exception as exc:
                 if "NOT_REGISTERED" in str(exc):
-                    logger.info("Upload server returned NOT_REGISTERED. Re-registering device and slot...")
+                    logger.debug("Upload server returned NOT_REGISTERED. Re-registering device and slot...")
                     await self.register_device()
                     req_res = await self.request_send_file(resolved_name, file_size, resolved_mime)
                     req_data = req_res.get("data") if isinstance(req_res.get("data"), dict) else req_res
